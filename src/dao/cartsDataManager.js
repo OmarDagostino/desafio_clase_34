@@ -1,16 +1,8 @@
 import mongoose from 'mongoose';
-import {cartModel} from './models/user.model.js';
+import {cartModel} from '../models/cart.model.js';
 import {Router} from 'express';
 import { ObjectId } from 'mongodb';
 import {config} from '../config/config.js'
-
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
 
 
 const router = Router ()
@@ -32,26 +24,19 @@ async obtenerCarrito (cid)
     const cartId = cid;
     const validObjectId = ObjectId.isValid(cartId) ? new ObjectId(cartId) : null;
     if (!validObjectId) { 
-      err=451;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error("Identificador del carrito invalido");
       } else {
+       
         const cart = await cartModel.findOne({ _id : cartId }).populate('products.productId');
-          if (cart) {
+       
+        if (cart) {
           return(cart);
         } else {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+          console.error('Carrito no encontrado');
         }
       }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error('Error en el servidor', error);
   }
 };
 async obtenerCarritoSinPopulate (cid)
@@ -62,9 +47,7 @@ async obtenerCarritoSinPopulate (cid)
     const cartId = cid;
     const validObjectId = ObjectId.isValid(cartId) ? new ObjectId(cartId) : null;
     if (!validObjectId) { 
-      err=451;
-      mesageError=errorDict.getErrorMessage(err);
-      console.error(mesageError);
+      console.error("Identificador del carrito invalido");
       } else {
        
         let cart = await cartModel.findOne({ _id : cartId });
@@ -72,16 +55,11 @@ async obtenerCarritoSinPopulate (cid)
         if (cart) {
           return(cart);
         } else {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+          console.error('Carrito no encontrado');
         }
       }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    console.error(mesageError, error);
+    console.error('Error en el servidor', error);
   }
 };
 // Actualizar un carrito
@@ -91,19 +69,13 @@ async actualizarCarrito (newcart,cid)
     const cartId = cid;
     const validObjectId = ObjectId.isValid(cartId) ? new ObjectId(cartId) : null;
     if (!validObjectId) { 
-          err=451;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+      console.error("Identificador del carrito invalido");
       } else {
 
         let cart = await cartModel.findOne({ _id : cartId }).exec();
 
         if (!cart) {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+          console.error('Carrito no encontrado');
           return;
         }
             cart = newcart;
@@ -112,10 +84,7 @@ async actualizarCarrito (newcart,cid)
         }
       
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err);
-    loggerWithLevel (level,mesageError);
+    console.error (`Error en el servidor ${error}`)
   }
 };
 
@@ -128,10 +97,7 @@ async crearCarrito  (newcart)
       
     }
      catch (error) {
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error(`Error en el servidor ${error}`);
     }
   }; 
 

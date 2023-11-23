@@ -1,16 +1,8 @@
 import __dirname from '../util.js';
 import {Server} from 'socket.io';
-import { chatModel } from '../../src/dao/models/user.model.js';
+import { chatModel } from '../../src/models/chat.model.js';
 import express from 'express';
 
-
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
 
 // dinámica del CHAT
 
@@ -56,11 +48,7 @@ export function chatController(server) {
           console.log('Nuevo mensaje guardado con éxito:');
         })
         .catch((error) => {
-          err=553;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
-          
+          console.error('Error inesperado al guardar el mensaje:', error);
         });
     });
 
@@ -85,13 +73,9 @@ export function chatController(server) {
       mensajes.length = 0;
       mensajes.push(...mensajesArray);
     } catch (error) {
-        err=552;
-        mesageError=errorDict.getErrorMessage(err);
-        level = levelErr.getLevelError(err)
-        loggerWithLevel (level,mesageError)
-        
+      console.error('Error inesperado al leer los mensajes guardados:', error);
     }
   }
-  }
+}
 
 export default chatController;

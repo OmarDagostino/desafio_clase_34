@@ -1,18 +1,23 @@
 {{>menu}}
 <body>
-    <h4>
+    <h4 id="identificador del carrito ">
         Identificador del carrito 
     
     <strong> 
         {{cart.cartId}}
-    </strong>
-    <strong>
-        <form action="api/carts/{{cart.cartId}}/purchase" method="POST">
+   
+        <form id=submitcomprar action="api/carts/{{cart.cartId}}/purchase" method="POST">
             <button id=boton_de_compra type="submit">Comprar</button>
         </form>
-        {{mensaje}}
+        
     </strong>
     </h4>
+<h4>
+    <strong>
+        {{mensaje}}
+    </strong>
+</h4>
+
     <table>
         <thead>
             <tr>
@@ -22,7 +27,6 @@
                 <th>Precio</th>
                 <th>Código</th>
                 <th>Cantidad comprada</th>
-                <th>Sacar del carrito</th>
             </tr>
         </thead>
         <tbody id="productTableBody">
@@ -34,65 +38,9 @@
                     <td>{{this.price}}</td>
                     <td>{{this.code}}</td>
                     <td>{{this.cantidad}}</td>
-                    <td>
-                        <button class="sacarDelCarrito" data-productid="{{this.productId}}">Sacar del carrito</button>
-                    </td>
                 </tr>
             {{/each}}
         </tbody>
     </table>
-    
-    <script> 
-       document.addEventListener("DOMContentLoaded", function () {
-            const cartId = "{{cart.cartId}}"
-            const getoffButtons = document.querySelectorAll(".sacarDelCarrito");
-            getoffButtons.forEach(function (button) {
-                button.addEventListener("click", function () {
-                    const productId = button.getAttribute("data-productid");
-                    fetch(`/api/carts/${cartId}/product/${productId}`, {
-                        method: "DELETE",
-                    })
-                   
-                    .then(function (response)  {
-                            if (response.ok) {
-                                return response.json ()
-                                console.log ('producto eliminado')
-                                
-                        } else {
-                                console.error ('*** error al eliminar un producto del carrito')
-                            } 
-                    })
- 
-                    .then(function (data) {
-                       
-
-                          
-                        //
-                        const productTableBody = document.getElementById("productTableBody");
-                        productTableBody.innerHTML = "";
-                        data.updatedCart.products.forEach(function (product) {
-                        
-                            const newRow = document.createElement("tr");
-                            newRow.innerHTML = `<td>${product.productId._id}</td>
-                                                <td>${product.productId.code}</td>
-                                            <td>${product.productId.title}</td>
-                                            <td>${product.productId.description}</td>
-                                            <td>${product.productId.price}</td>
-                                            <td>${product.quantity}</td>
-                                            <td>
-                                               
-                                                <button class="sacarDelCarrito" data-productid="${product.productId._id}"> Sacar del carrito </button>
-                                            </td>`;
-                             productTableBody.appendChild(newRow);
-
-                        });   
-                         location.reload(); 
-                        })                          
-                    .catch(function (error) {
-                    console.error("Error al realizar la solicitud DELETE:", error);
-                    });
-                });
-            });
-        }); 
-    </script>
+</body>
 </body>

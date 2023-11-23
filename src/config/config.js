@@ -9,7 +9,6 @@ program
 
 export const opciones = program.opts();
 
-
 let pathenv = `./src/.env.${opciones.modo}`;
 
 dotenv.config({ path: pathenv, override: true });

@@ -1,16 +1,8 @@
 import mongoose from 'mongoose';
-import {productModel} from './models/user.model.js';
+import {productModel} from '../models/product.model.js';
 import {Router} from 'express';
 import { ObjectId } from 'mongodb';
 import {config} from '../config/config.js'
-
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
 
 const router = Router ()
 
@@ -33,11 +25,8 @@ async obtenerProductos (combinedFilter, options)
 
     return (products);
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    }
+    console.error({ status: 'error', message: 'Error en el servidor',error });
+  }
 };
 
 // obtener un producto por su ID
@@ -47,26 +36,17 @@ async obtenerProducto (pid)
     const productId = pid ;
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-      err=452;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error("* Identificador de Producto invalido *");
       } else {
         const product = await productModel.findOne({ _id: productId}).exec();
         if (product) {
           return (product);
         } else {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+          console.error('Producto no encontrado');
         }
       }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(`Error en el servidor ${error}`);
   }
 };
 
@@ -79,10 +59,7 @@ async obtenerProductoPorCodigo (codigo)
   return existingProduct
  }
  catch (error) {
-  err=500;
-  mesageError=errorDict.getErrorMessage(err);
-  level = levelErr.getLevelError(err)
-  loggerWithLevel (level,mesageError)
+  console.error(`Error en el servidor ${error}`);
   }
 };
 
@@ -92,14 +69,14 @@ async crearProducto (newProduct)
     try {
       
       const product = new productModel({ ...newProduct});
+      if (product.status===undefined || product.status !== true && product.status !== false ) {
+        product.status = true
+      }
       await product.save();
   
       
     } catch (error) {
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error('Error en el servidor',error);
     }
   };
   
@@ -112,20 +89,14 @@ async actualizarProducto (producto,pid)
     const updatedProduct = producto;
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-      err=452;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error("** Identificador de Producto invalido **");
       } else {
 
 
     let product = await productModel.findOne({ _id : productId }).exec();
 
     if (!product) {
-      err=404;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error('Producto no encontrado');
       return;
     }
 
@@ -135,10 +106,7 @@ async actualizarProducto (producto,pid)
     
   }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError);
+    console.error('******Error en el servidor*******');
   }
 };
 
@@ -149,30 +117,22 @@ async eliminarProducto (pid)
     const productId = pid;
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-        err=452;
-        mesageError=errorDict.getErrorMessage(err);
-        level = levelErr.getLevelError(err)
-        loggerWithLevel (level,mesageError)
+      console.error("Identificador de Producto invalido");
       } else {
 
     const product = await productModel.findOne({ _id : productId }).exec();
 
     if (!product) {
-        err=404;
-        mesageError=errorDict.getErrorMessage(err);
-        level = levelErr.getLevelError(err)
-        loggerWithLevel (level,mesageError)
-        return;
+      console.error('Producto no encontrado');
+      return;
     }
 
     await product.deleteOne({ _id : productId })
-    console.log(`Producto con ID ${productId} eliminado`)
+    console.error(`Producto con ID ${productId} eliminado`)
   }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(error)
+    console.error('Error en el servidor')
   }
 }
 }

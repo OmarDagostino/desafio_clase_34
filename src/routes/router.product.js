@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { authAdmin } from '../util.js';
+import { authAdmin } from '../middlewares/authMiddle.js';
 import productsController from '../controllers/productsController.js'
 import { body, validationResult } from 'express-validator';
 
@@ -19,26 +19,32 @@ router.get('/products/:pid', productsController.getProductById);
 router.get ('/mockingproducts', productsController.getMockingProducts)
 
 // POST para crear un nuevo producto
+
 router.post(
-    '/products',
-    authAdmin,
-    [
-      body('title').notEmpty().isString(),
-      body('description').notEmpty().isString(),
-      body('code').notEmpty().isString(),
-      body('price').notEmpty().isNumeric(),
-      body('stock').notEmpty().isNumeric(),
-      body('category').notEmpty().isString(),
-      body('status').optional().isBoolean(),
-    ],
-    (req, res) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      productsController.crearProducto (req,res) 
-         }
-  );
+  '/products',
+  authAdmin,
+  [
+    body('title').notEmpty().withMessage('El título es requerido').isString(),
+    body('description').notEmpty().withMessage('La descripción es requerida').isString(),
+    body('code').notEmpty().withMessage('El código es requerido').isString(),
+    body('price').notEmpty().withMessage('El precio es requerido').isNumeric(),
+    body('stock').notEmpty().withMessage('El stock es requerido').isNumeric(),
+    body('category').notEmpty().withMessage('La categoría es requerida').isString(),
+    body('status').optional().isBoolean().withMessage('El status debe ser true o false'),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map(error => ({
+        param: error.path,
+        msg: error.msg,
+      }));
+      return res.status(400).json({ errors: formattedErrors });
+    }
+    productsController.crearProducto(req, res);
+  }
+);
+
   
 // PUT para actualizar un producto por su ID
 router.put('/products/:pid',authAdmin, async (req,res)=> { 

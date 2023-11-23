@@ -1,17 +1,9 @@
 import mongoose from 'mongoose';
-import {cartModel} from './models/user.model.js';
-import {userModel} from './models/user.model.js';
+import {cartModel} from '../models/cart.model.js';
+import {userModel} from '../models/user.model.js';
 import {Router} from 'express';
 import {createHash} from '../util.js';
 import {config} from '../config/config.js'
-
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
 
 const router = Router ()
 
@@ -31,10 +23,7 @@ async obtenerUsuarioPorEmail (direccionDeCorreo)
     return existingUser
    }
    catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(`Error en el servidor ${error}`);
     }
 
 };
@@ -46,10 +35,7 @@ async obtenerUsuarioPorId   (id)
     return existingUser
    }
    catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(`Error en el servidor ${error}`);
     }
 
 };
@@ -62,10 +48,7 @@ async obtenerUsuarioPorCartid   (CartId)
     return existingUser
    }
    catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(`Error en el servidor ${error}`);
     }
 
 };
@@ -81,10 +64,7 @@ async crearUsuario  (name,email,password,typeofuser,last_name,age)
     cartId = newCart._id
   }
    catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    consosle.error(error)
   }
 
   try {
@@ -96,10 +76,8 @@ async crearUsuario  (name,email,password,typeofuser,last_name,age)
 
    }
    catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error('*error en el servidor*');
+    console.error(error);
     }
 }
 

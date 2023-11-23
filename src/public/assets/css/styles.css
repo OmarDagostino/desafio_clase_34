@@ -89,6 +89,16 @@ th, td {
   background-color: greenyellow;
   border-radius: 5px;
   padding : 5px;
-  margin: 5px 140px;
-  display:flex
+  width: fit-content;
+  margin: 5px 40px;
+  display: inline-block
+}
+
+#submitcomprar {
+  width: 300px;
+  display:inline-block
+}
+
+#identificadordelcarrito {
+  display:inline-block
 }

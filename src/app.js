@@ -9,10 +9,11 @@ import viewsRouter from './routes/router.views.js';
 import {router as sesionsRouter} from './routes/router.sessions.js';
 import session from 'express-session';
 import ConnectMongo from 'connect-mongo';
-import inicializaPassport from './routes/passport-config.js';
+import inicializaPassport from './middlewares/passport-config.js';
 import passport from 'passport';
 import {config} from './config/config.js';
 import chatController from './controllers/chatController.js'
+import { errorHandler } from './errorManagement/errorHandler.js';
 
 const app = express();
 
@@ -36,10 +37,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/api/sesions', sesionsRouter)
 app.use('/',viewsRouter);
-
-app.use('/api',apiLoggerRouter);
+app.use('/api', apiLoggerRouter);
 app.use('/api', apiCartRouter);
 app.use('/api', apiProductRouter);
+
+app.use (errorHandler)
 
 const PORT = config.PORT;
 const server = app.listen(PORT, () => {

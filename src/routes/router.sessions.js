@@ -4,6 +4,7 @@ import usersController from '../controllers/usersController.js';
 export const router = Router ();
 router.use(bodyParser.urlencoded({ extended: true }));
 import passport from 'passport'; 
+import dtousuario from '../middlewares/dtoUsuario.js';
 
 
 router.get ('/errorLogin', usersController.errorLogin);
@@ -47,7 +48,9 @@ router.get('/logout', usersController.logout)
 
 // mostrar los datos del usuario que esta registrado
 
-router.get('/current', usersController.current)
+router.get('/current1', usersController.current1)
 
-  
+// mostrar los datos del usuario que esta registrado
+
+router.get('/current',dtousuario, usersController.current)
   

@@ -2,35 +2,13 @@ import express from 'express';
 import handlebars from 'express-handlebars';
 import {Router} from 'express';
 import path from 'path';
-import {authUser } from '../util.js';
+import {authUser,auth,auth2 } from '../middlewares/authMiddle.js';
 import __dirname from '../util.js';
-import {cartModel, productModel} from '../dao/models/user.model.js';
+import {cartModel} from '../models/cart.model.js';
+import {productModel} from '../models/product.model.js';
 import { ObjectId } from 'mongodb';
-import {ErrorDictionary} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let err 
-let mesageError
 
 const router = express.Router()
-
-// middleware para redireccionar al login si no tiene una sesion activa 
-const auth=(req,res,next)=>{
-    if (req.session.usuario) {
-      
-        next ()
-    } else {
-        return res.redirect('/login')
-    }
-}
-
-// middleware para redireccionar a la vista principal si tiene una sesion activa 
-const auth2=(req,res,next)=>{
-    if (req.session.usuario) {
-        return res.redirect('/products')  
-    } else {
-        next ()
-    }
-}
 
 // mostrarMenu maneja la renderizacion de los items del menu segun corresponda (con true o false)
 //
@@ -350,7 +328,7 @@ router.get('/registro',auth2,  (req,res)=>{
   })
 
   // ruta para mostrar el registro del usuario que hizo login
-router.get('/current',auth,  (req,res)=>{
+router.get('/current1',auth,  (req,res)=>{
   mostrarMenu0=true;
   mostrarMenu1=false;
   mostrarMenu2=false;
@@ -372,7 +350,7 @@ router.get('/current',auth,  (req,res)=>{
   let typeofuser=req.user.typeofuser
 
     res.setHeader('Content-Type','text/html');
-    res.status(200).render('current',{name, last_name, email, age, cartId,mostrarMenu0,typeofuser,mostrarMenu1,mostrarMenu2,mostrarMenu3,mostrarMenu4,mostrarMenu5,mostrarMenu6,mostrarMenu7,mostrarMenu8,mostrarMenu9});
+    res.status(200).render('current1',{name, last_name, email, age, cartId,mostrarMenu0,typeofuser,mostrarMenu1,mostrarMenu2,mostrarMenu3,mostrarMenu4,mostrarMenu5,mostrarMenu6,mostrarMenu7,mostrarMenu8,mostrarMenu9});
   })
 
 // ruta para el chat
@@ -427,9 +405,7 @@ router.get('/products', auth,  async (req,res) => {
       res.status(200).render('products', { renderedProducts,name, cartId, typeofuser, mostrarMenu0,mostrarMenu1,mostrarMenu2,mostrarMenu3,mostrarMenu4,mostrarMenu5,mostrarMenu6,mostrarMenu7,mostrarMenu8,mostrarMenu9}); 
     } catch (error) {
       console.error(error);
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      res.status(err).send(mesageError,error);
+      res.status(500).send('Error en el servidor');
     }
   })
  
@@ -466,10 +442,8 @@ router.get('/carts/:cid',  async (req,res)  => {
           }
         }
     } catch (error) {
-      console.error(error);
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      res.status(err).send(mesageError,error);
+      console.error(error)
+      res.status(500).send('*** Error en el servidor');
     }
    
   });
@@ -519,10 +493,8 @@ router.get('/carts', auth, async (req,res)  => {
         }
       }
   } catch (error) {
-    console.error(error);
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      res.status(err).send(mesageError,error);
+    console.error(error)
+    res.status(500).send('*** Error en el servidor');
   }
  
 });

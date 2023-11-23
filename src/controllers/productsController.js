@@ -6,17 +6,11 @@ import bodyParser from 'body-parser';
 router.use(bodyParser.urlencoded({ extended: true }));
 import { body, validationResult } from 'express-validator';
 import { generateProducts }  from '../util.js';
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
-
+import { CustomError } from '../errorManagement/diccionarioDeErrores.js';
 
 // GET para retornar varios productos o todos
 async function getProducts (req, res) {
+  let customStatusCode =500 ;   
   try {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
@@ -59,46 +53,44 @@ async function getProducts (req, res) {
 
     res.json(response);
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).send(mesageError,error);
+    if (customStatusCode===500) {
+      let error = CustomError.createCustomError(16);
+          customStatusCode=error.codigo;
+    }
+    res.status(customStatusCode).send(`${error.descripcion} `);
   }
 };
 
 // GET para retornar un producto por su ID
 async function getProductById (req, res) {
- 
+ let customStatusCode = 500;
   try {
     const productId = req.params.pid;
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
+    
     if (!validObjectId) { 
-      err=404;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
+      let error = CustomError.createCustomError(4);
+      customStatusCode=error.codigo;
+      throw (error);
       } else {
         const product = await productServices.obtenerProducto(productId);
         if (product) {
           res.json(product);
         } else {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
-          res.status(err).send(mesageError);
+          let error = CustomError.createCustomError(5);
+          customStatusCode=error.codigo;
+          throw (error);
         }
       }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).send(mesageError,error);
+    if (customStatusCode===500) {
+      let error = CustomError.createCustomError(15);
+          customStatusCode=error.codigo;
+    }
+    res.status(customStatusCode).send(`${error.descripcion} `);
   }
 };
+
 
 // GET paara retornar 100 productos imaginarios creados con faker-js
 async function getMockingProducts (req,res) {
@@ -106,44 +98,38 @@ async function getMockingProducts (req,res) {
 for (let i=0;i<100;i++) {
   products[i] = generateProducts ()
 }
-err=200;
-mesageError=errorDict.getErrorMessage(err);
-level = levelErr.getLevelError(err)
-loggerWithLevel (level,mesageError)
-res.status(err).json(products);
+res.status(200).json(products);
 }
+
 
 // POST para crear un nuevo producto
 async function crearProducto(req, res) {
+  let customStatusCode =500            ;   
   try {
     
     const newProduct = req.body;
-  
+   
     // Verificar si el producto ya existe por su código
     const existingProduct = await productServices.obtenerProductoPorCodigo(newProduct.code);
     if (existingProduct) {
-      err=454;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
-      return;
+      
+      let error = CustomError.createCustomError(18);
+      customStatusCode=error.codigo;
+      throw (error);
     }
 
     // const product = new productModel({ ...newProduct });
    
     await productServices.crearProducto(newProduct);
-    err=201;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).json(newProduct);
+    let error = CustomError.createCustomError(19);
+      customStatusCode=error.codigo;
+      throw (error);
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).send(mesageError,error);
+    if (customStatusCode===500) {
+      let error = CustomError.createCustomError(20);
+          customStatusCode=error.codigo;
+    }
+    res.status(customStatusCode).send(`${error.descripcion} `);
   }
 }
 
@@ -151,6 +137,7 @@ async function crearProducto(req, res) {
 // PUT para actualizar un producto por su ID
 async function actualizarProducto (req, res) {
   
+  let customStatusCode =500            ;   
   try {
     const productId = req.params.pid;
     const updatedProduct = req.body;
@@ -167,32 +154,27 @@ async function actualizarProducto (req, res) {
          (req, res, next) => {
           const errors = validationResult(req);
           if (!errors.isEmpty()) {
-            res.setHeader('Content-Type','application/json');
-            err=453;
-            return res.status(453).json({ errors: errors.array() });
+            let error = CustomError.createCustomError(14);
+            customStatusCode=error.codigo;
+            throw (error,errors.array());
           }
           next();
         }
       ];
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-      err=452;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
+      let error = CustomError.createCustomError(4);
+      customStatusCode=error.codigo;
+      throw (error);
       } else {
 
 
     const product = await productServices.obtenerProducto(productId);
 
     if (!product) {
-      err=404;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
-      return;
+      let error = CustomError.createCustomError(5);
+      customStatusCode=error.codigo;
+      throw (error);
     }
 
     // Actualizar el producto
@@ -203,44 +185,40 @@ async function actualizarProducto (req, res) {
     }
 
     await productServices.actualizarProducto(product,productId);
-    err=201;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).json(product);
+
+    let error = CustomError.createCustomError(21);
+      customStatusCode=error.codigo;
+      throw (error);
   }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).send(mesageError,error);
+    if (customStatusCode===500) {
+      let error = CustomError.createCustomError(22);
+          customStatusCode=error.codigo;
+    }
+    res.status(customStatusCode).send(`${error.descripcion} `);
   }
 };
 
 // DELETE para eliminar un producto por su ID
 async function borrarProducto(req, res) {
+  let customStatusCode =500 ;
+  let updatedProducts=[]   ;   
   try {
     
     const productId = req.params.pid;
     const validObjectId = ObjectId.isValid(productId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-      err=452;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
+      let error = CustomError.createCustomError(4);
+      customStatusCode=error.codigo;
+      throw (error);
       } else {
 
     const product = await productServices.obtenerProducto(productId);
 
     if (!product) {
-      err=404;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
-      res.status(err).send(mesageError);
-      return;
+      let error = CustomError.createCustomError(5);
+      customStatusCode=error.codigo;
+      throw (error);
     }
 
 
@@ -249,16 +227,18 @@ async function borrarProducto(req, res) {
       page: 1,
       limit: 10000000000000
     }
-    const updatedProducts = await productServices.obtenerProductos({},options);
-    err=200;
-    res.status(err).json({ message: 'Producto eliminado', products: updatedProducts })
+    updatedProducts = await productServices.obtenerProductos({},options);
+    let error = CustomError.createCustomError(23);
+      customStatusCode=error.codigo;
+      return res.status(customStatusCode).json({ message: 'Producto eliminado', products: updatedProducts })
+  
   }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
-    res.status(err).send(mesageError,error);
+    if (customStatusCode===500) {
+      let error = CustomError.createCustomError(17);
+          customStatusCode=error.codigo;
+    }
+    res.status(customStatusCode).send(`${error.descripcion} `);
   }
 };
 

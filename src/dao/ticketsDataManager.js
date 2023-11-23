@@ -1,16 +1,8 @@
 import mongoose from 'mongoose';
-import {lastModel, ticketsModel} from './models/user.model.js';
+import {lastModel, ticketsModel} from '../models/ticket.model.js';
 import {Router} from 'express';
 import { ObjectId } from 'mongodb';
 import {config} from '../config/config.js'
-
-import { loggerWithLevel, logger } from '../logger.js';
-import {ErrorDictionary, levelError} from '../errorDictionary.js';
-const errorDict = new ErrorDictionary();
-let levelErr = new levelError ();
-let level
-let err 
-let mesageError
 
 const router = Router ()
 
@@ -30,26 +22,17 @@ async obtenerTicket (tid)
     const ticketId = tid ;
     const validObjectId = ObjectId.isValid(ticketId) ? new ObjectId(productId) : null;
     if (!validObjectId) { 
-      err=455;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error("Identificador de Ticket invalido");
       } else {
         const ticket = await ticketsModel.findOne({ _id: ticketId}).exec();
         if (ticket) {
           return (ticket);
         } else {
-          err=404;
-          mesageError=errorDict.getErrorMessage(err);
-          level = levelErr.getLevelError(err)
-          loggerWithLevel (level,mesageError)
+          console.error('Ticket no encontrado');
         }
       }
   } catch (error) {
-    err=500;
-    mesageError=errorDict.getErrorMessage(err);
-    level = levelErr.getLevelError(err)
-    loggerWithLevel (level,mesageError)
+    console.error(`Error en el servidor ${error}`);
   }
 };
 
@@ -75,10 +58,7 @@ async obtenerCodigoMayor ()
           } 
       catch (error) 
           {
-            err=500;
-            mesageError=errorDict.getErrorMessage(err);
-            level = levelErr.getLevelError(err)
-            loggerWithLevel (level,mesageError)
+          console.error(`Error en el servidor ${error}`);
           }
 };
 
@@ -89,10 +69,7 @@ async crearTicket (newticket)
       const ticket = new ticketsModel({...newticket});
       await ticket.save();
     } catch (error) {
-      err=500;
-      mesageError=errorDict.getErrorMessage(err);
-      level = levelErr.getLevelError(err)
-      loggerWithLevel (level,mesageError)
+      console.error('*-* Error en el servidor*-*');
     }
   };
   
